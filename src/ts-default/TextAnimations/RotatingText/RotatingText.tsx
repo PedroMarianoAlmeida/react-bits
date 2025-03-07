@@ -55,7 +55,7 @@ export interface RotatingTextProps
   elementLevelClassName?: string;
 }
 
-const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
+const RotatingTextAnimated = forwardRef<RotatingTextRef, RotatingTextProps>(
   (props, ref) => {
     const {
       texts,
@@ -268,6 +268,43 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
     );
   }
 );
+
+const StaticText = ({
+  texts,
+  mainClassName,
+}: Pick<RotatingTextProps, "texts" | "mainClassName">) => {
+  return (
+    <p className={mainClassName}>
+      {texts.map((text, index) => (
+        <span key={index}>{text} </span>
+      ))}
+    </p>
+  );
+};
+
+const RotatingText = (props: RotatingTextProps) => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <StaticText texts={props.texts} mainClassName={props.mainClassName} />
+    );
+  }
+
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  return prefersReducedMotion ? (
+    <StaticText texts={props.texts} mainClassName={props.mainClassName} />
+  ) : (
+    <RotatingTextAnimated {...props} />
+  );
+};
 
 RotatingText.displayName = "RotatingText";
 export default RotatingText;
